@@ -9,3 +9,5 @@ License: MIT
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
+URL: https://github.com/DuchaHapsari/s3oopdh
+BugReports: https://github.com/DuchaHapsari/s3oopdh/issues
