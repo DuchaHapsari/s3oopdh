@@ -1,0 +1,177 @@
+---
+title: "T-test_Documentation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{T-test_Documentation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(s3oopdh)
+```
+
+## Constructor Function - `myttest`
+This project aims to create an S3 object-oriented package to execute statistical Student's t-test of two samples, print the output, and then display the distribution on to a boxplot. A constructor function called `myttest()` is created to take in data from sample x and y, as well as alpha (degree of significance) and boolean input whether or not the samples are paired. x and y are constricted to be numeric, alpha to be a double, and paired to be logical input.
+
+According to paired information, the code runs conditional if statement to execute t-test. If `paired==TRUE`, the function will input `paired=TRUE` as the parameter for `t.test`. If `paired==FALSE`, it will run `var.test` to check if the variances are considerably equal or not. Variance equality is assessed through comparison between its p-value and alpha. 
+
+`var.test` has the following null hypothesis:
+$$H_0 : \sigma_2^2 / \sigma_1^2 = 1$$
+If p-value is less than $\alpha$, variance is considered not equal ($H_0$ rejected) and it will run Welch test. If p-value is equal or greater than $\alpha$, it is considered equal ($H_0$ accepted) and will run two-sample t-test.
+
+t-test runs with the following null hypothesis:
+$$H_0 : \mu_2 - \mu_1 = 0$$
+Similar to `var.test`, $H_0$ is rejected if p-value < $\alpha$, and vice versa.
+
+Outcomes of t-test are stored in result and each components are stored as list under `obj`, which is then stored under class `Rttest` to be easily retrieved by the subsequent print and plot methods.
+
+```{r}
+myttest = function(x = numeric(), y = numeric(), alpha = double(), paired = logical())
+{
+  if (paired == TRUE)
+  {
+    result = t.test(x, y, paired=TRUE, conf.level=1-alpha)
+  }
+
+  else if (paired == FALSE)
+  {
+    v = var.test(x,y)
+
+    if (v$p.value < alpha)
+    {
+      result = t.test(x, y, paired=FALSE, var.equal=FALSE, conf.level=1-alpha)
+    }
+    else if (v$p.value >= alpha )
+    {
+      result = t.test(x, y, paired=FALSE, var.equal=TRUE, conf.level=1-alpha)
+    }
+  }
+
+  #extractable results from t.test
+
+  ci = result$conf.int
+  test_type = result$method
+
+  t_value = result$statistic
+  df = result$parameter
+  p_value = result$p.value
+  est_meanordiff = result$estimate
+  nullhyp = result$null.value
+  stderr = result$stderr
+  althyp = result$alternative
+
+  #storing these info into obj of class Rttest
+
+  obj = list(ci = ci,
+             test_type = test_type,
+             x = x,
+             y = y,
+             alpha = alpha,
+             paired = paired,
+             t_value = t_value,
+             df = df,
+             p_value = p_value,
+             est_meanordiff = est_meanordiff,
+             nullhyp = nullhyp,
+             stderr = stderr,
+             althyp = althyp)
+
+  class(obj) = "Rttest"
+  obj
+}
+```
+
+## Method - `print`
+This method can easily print useful information from the executed t-test - namely confidence interval, test type, p-value, and the decision whether to reject $H_0$ or not based on its p-value. Other information that has been stored in `Rttest` class can also be retrieved and added to this method to be printed to the console. 
+
+```{r}
+print.Rttest = function(x, ...)
+{
+  ci = x$ci
+  test_type = x$test_type
+  p_value = x$p_value
+  alpha = x$alpha
+
+  if (p_value < alpha)
+  {
+    RejectNullHypothesis = "Y"
+  }
+
+  else
+  {
+    RejectNullHypothesis = "N"
+  }
+
+  output = list(ci = ci, test_type = test_type, pvalue = p_value, RejectNullHypothesis = RejectNullHypothesis)
+  output
+}
+```
+
+## Method - `plot`
+This method retrieves the dataset of sample x and y to create boxplot of their distributions. For non-paired sample, this will create two boxplots of corresponding population. For paired sample, this will generate a boxplot of difference between sample x and y. 
+
+``` {r}
+plot.Rttest = function(x, ...)
+{
+  library(ggplot2)
+  sample1 = x$x
+  sample2 = x$y
+  paired = x$paired
+  difference = sample1-sample2
+
+  # plot the boxplot of two population samples
+  if (paired == FALSE)
+  {
+    pop = rep(c("sample1", "sample2"))
+    distribution = c(sample1, sample2)
+    df = data.frame(pop = pop, distribution = distribution)
+
+    g = ggplot(df, aes(x = pop, y = distribution, fill = pop )) + geom_boxplot()
+    g = g + ggtitle("Boxplot of Two Population Samples")
+    g
+  }
+
+  # plot the boxplot of differences of x and y
+  else if (paired == TRUE)
+  {
+    pop = rep(c("difference"))
+    df = data.frame(pop = pop, difference = c(difference))
+
+    g = ggplot(df, aes(x = pop, y = difference, fill = pop )) + geom_boxplot()
+    g = g + ggtitle("Boxplot of Differences between Two Samples")
+    g
+  }
+
+}
+```
+
+## Example Runs
+
+```{r}
+# Run 1
+set.seed(32); x=rnorm(30,mean=10,sd=15)
+set.seed(35); y=rnorm(30,mean=8,sd=15)
+ans1 = s3oopdh::myttest(x, y, alpha = 0.05, paired=FALSE)
+print(ans1)
+plot(ans1)
+# Run 2
+set.seed(32); x=rnorm(30,mean=10,sd=5)
+set.seed(35); y=rnorm(30,mean=8,sd=15)
+ans2 = s3oopdh::myttest(x,y,alpha=0.05,paired=FALSE)
+print(ans2)
+plot(ans2)
+# Run 3
+set.seed(32); x=rnorm(30,mean=10,sd=15)
+set.seed(35); y = x+ rnorm(30, 5 ,4)
+ans3 = s3oopdh::myttest(x,y,alpha=0.05,paired=TRUE)
+print(ans3)
+plot(ans3)
+```
