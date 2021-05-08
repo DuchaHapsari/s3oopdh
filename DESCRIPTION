@@ -5,9 +5,10 @@ Version: 0.1.0
 Author: Ducha Hapsari
 Maintainer: Ducha Hapsari <ducha.n.hapsari-1@ou.edu>
 Description: This s3 OOP package performs appropriate student's test on two given samples.The constructor function takes in samples from two population x and y, as well as alpha and paired as arguments. Two generic methods, print and plot, are also attached to this. Print displays the confidence interval and t-test type. The plot shows boxplot of the two samples. 
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
+Imports: ggplot2, stats
 URL: https://github.com/DuchaHapsari/s3oopdh
 BugReports: https://github.com/DuchaHapsari/s3oopdh/issues

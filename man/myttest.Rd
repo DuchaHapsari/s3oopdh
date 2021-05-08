@@ -4,7 +4,7 @@
 \alias{myttest}
 \title{Constructor Function to Perform Student's T-Test}
 \usage{
-myttest(x = numeric(), y = numeric(), alpha = double(), paired = boolean())
+myttest(x = numeric(), y = numeric(), alpha = double(), paired = logical())
 }
 \arguments{
 \item{x}{samples of population A}

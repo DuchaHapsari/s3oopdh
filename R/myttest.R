@@ -6,6 +6,8 @@
 #' @param paired whether x and y are paired samples
 #'
 #' @return list of confidence interval, test type, p-value, decision to reject or not to reject null hypothesis
+#' @importFrom ggplot2 ggplot aes geom_boxplot ggtitle
+#' @importFrom stats var.test t.test
 #' @export
 #'
 #' @examples
@@ -15,7 +17,7 @@
 #' print(ans1)
 #' plot(ans1)
 #'
-myttest = function(x = numeric(), y = numeric(), alpha = double(), paired = boolean())
+myttest = function(x = numeric(), y = numeric(), alpha = double(), paired = logical())
 {
   if (paired == TRUE)
   {
@@ -90,7 +92,6 @@ print.Rttest = function(x, ...)
   output
 }
 
-
 plot.Rttest = function(x, ...)
 {
   sample1 = x$x
@@ -102,22 +103,23 @@ plot.Rttest = function(x, ...)
   if (paired == FALSE)
   {
     pop = rep(c("sample1", "sample2"))
-    df = data.frame(pop = pop, l = c(sample1, sample2))
-    library(ggplot2)
-    g = ggplot(df, aes(x = pop, y = l, fill = pop )) + geom_boxplot()
+    distribution = c(sample1, sample2)
+    df = data.frame(pop = pop, distribution = distribution)
+
+    g = ggplot(df, aes(x = pop, y = distribution, fill = pop )) + geom_boxplot()
     g = g + ggtitle("Boxplot of Two Population Samples")
-    print(g)
+    g
   }
 
   # plot the boxplot of differences of x and y
   else if (paired == TRUE)
   {
     pop = rep(c("difference"))
-    df = data.frame(pop = pop, l = c(difference))
-    library(ggplot2)
-    g = ggplot(df, aes(x = pop, y = l, fill = pop )) + geom_boxplot()
+    df = data.frame(pop = pop, difference = c(difference))
+
+    g = ggplot(df, aes(x = pop, y = difference, fill = pop )) + geom_boxplot()
     g = g + ggtitle("Boxplot of Differences between Two Samples")
-    print(g)
+    g
   }
 
 }
