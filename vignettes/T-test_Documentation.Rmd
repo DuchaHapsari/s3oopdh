@@ -162,12 +162,16 @@ set.seed(35); y=rnorm(30,mean=8,sd=15)
 ans1 = s3oopdh::myttest(x, y, alpha = 0.05, paired=FALSE)
 print(ans1)
 plot(ans1)
+```
+```{r}
 # Run 2
 set.seed(32); x=rnorm(30,mean=10,sd=5)
 set.seed(35); y=rnorm(30,mean=8,sd=15)
 ans2 = s3oopdh::myttest(x,y,alpha=0.05,paired=FALSE)
 print(ans2)
 plot(ans2)
+```
+```{r}
 # Run 3
 set.seed(32); x=rnorm(30,mean=10,sd=15)
 set.seed(35); y = x+ rnorm(30, 5 ,4)
