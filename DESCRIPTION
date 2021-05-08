@@ -12,3 +12,7 @@ RoxygenNote: 7.1.1
 Imports: ggplot2, stats
 URL: https://github.com/DuchaHapsari/s3oopdh
 BugReports: https://github.com/DuchaHapsari/s3oopdh/issues
+Suggests: 
+    rmarkdown,
+    knitr
+VignetteBuilder: knitr
